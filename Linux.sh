@@ -28,9 +28,21 @@ PORTS=$(netstat -vatn | awk '$6 == "LISTEN"'| awk '{print $1, "\t", $4}')
 STATUS_R=$(service --status-all | awk '$2 == "+"'| awk '{print $4, "\t", "running"}')
 STATUS_S=$(service --status-all | awk '$2 == "-"'| awk '{print $4, "\t", "stopped"}')
 
-SERVICE=$(top -l 1 -s 0 | grep $FILT_2 | awk '{print $2, "\t", $13}')
+#in SE you can put the service you want to check the status
+SE='httpd'
+ 
+if ps ax | grep -v grep | grep $SE > /dev/null
+then
+    SERVICE=$(echo "$SE  running")
+else
+    SERVICE=$(echo "$SE  stopped")
+fi
 
-MEM=$(top -l 1 -o mem -stats mem,command | awk 'NR>12 {print $2, "\t", $1}')
+MEM=$(ps axo rss,comm,pid \
+| awk '{ proc_list[$2]++; proc_list[$2 "," 1] += $1; } \
+END { for (proc in proc_list) { printf("%d\t%s\n", \
+proc_list[proc "," 1],proc); }}' | sort -n | tail -n 10 | sort -rn \
+| awk '{$1/=1024;printf "%s\t%.0f MB\n",$2,$1}')
 
 /bin/cat <<EOM >$FILE
 Hostname  $HOST

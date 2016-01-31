@@ -26,8 +26,3 @@ ServiceName <tab> Status - ServiceName as label, Status as Value.
 
 You might have to install some packages like apache and mysql.
 Do as many lines as you can.
-
-
-
-
-by MrsSarahPierce on 
